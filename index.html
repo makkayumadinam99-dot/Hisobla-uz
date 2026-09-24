@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="Hisobla.uz — простые калькуляторы для жизни в Узбекистане.">
+<title>Hisobla.uz — Калькуляторы для Узбекистана</title>
+<style>
+:root{--bg:#f6f8fb;--card:#fff;--text:#172033;--muted:#657084;--accent:#1769e0;--border:#e3e8f0}
+*{box-sizing:border-box}body{margin:0;font-family:Inter,Arial,sans-serif;background:var(--bg);color:var(--text)}
+header{background:#fff;border-bottom:1px solid var(--border);position:sticky;top:0;z-index:5}
+.nav{max-width:1050px;margin:auto;padding:16px 20px;display:flex;align-items:center;justify-content:space-between}
+.logo{font-size:24px;font-weight:800}.logo span{color:var(--accent)}
+.lang{border:1px solid var(--border);background:#fff;border-radius:10px;padding:9px 12px;cursor:pointer}
+.hero{max-width:1050px;margin:0 auto;padding:48px 20px 25px}.hero h1{font-size:42px;margin:0 0 12px;line-height:1.08}.hero p{font-size:18px;color:var(--muted);max-width:650px}
+.grid{max-width:1050px;margin:auto;padding:10px 20px 45px;display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:16px}
+.card{background:var(--card);border:1px solid var(--border);border-radius:18px;padding:22px;box-shadow:0 4px 18px #14213d08}
+.card h2{font-size:18px;margin:0 0 8px}.card p{color:var(--muted);font-size:14px;min-height:38px}
+button.primary{width:100%;padding:12px;border:0;border-radius:10px;background:var(--accent);color:#fff;font-weight:700;cursor:pointer}
+.calc{max-width:700px;margin:0 auto 50px;padding:0 20px}.panel{background:#fff;border:1px solid var(--border);border-radius:18px;padding:24px}
+label{display:block;font-size:14px;font-weight:700;margin:14px 0 7px}input{width:100%;padding:13px;border:1px solid #ccd4df;border-radius:10px;font-size:16px}
+.result{margin-top:18px;padding:18px;border-radius:12px;background:#eef5ff}.result strong{font-size:25px;color:var(--accent)}
+.small{color:var(--muted);font-size:13px;margin-top:8px}.error{color:#b42318;font-size:14px;margin-top:10px}
+footer{text-align:center;color:var(--muted);padding:30px 20px;border-top:1px solid var(--border)}
+@media(max-width:600px){.hero h1{font-size:34px}.hero{padding-top:35px}}
+</style>
+</head>
+<body>
+<header><div class="nav"><div class="logo">Hisobla<span>.uz</span></div><button class="lang" id="langBtn">O‘zbekcha</button></div></header>
+
+<section class="hero">
+<h1>Посчитай всё для жизни в Узбекистане</h1>
+<p>Простые бесплатные калькуляторы — кредит, проценты, скидки, топливо и другие расчёты.</p>
+</section>
+
+<main class="grid">
+<article class="card"><h2>💳 Кредит</h2><p>Рассчитайте ежемесячный платёж по сумме, ставке и сроку.</p><button class="primary" onclick="showCalc('credit')">Открыть</button></article>
+<article class="card"><h2>📈 Проценты</h2><p>Узнайте, сколько составляют проценты от суммы.</p><button class="primary" onclick="showCalc('percent')">Открыть</button></article>
+<article class="card"><h2>🏷️ Скидка</h2><p>Рассчитайте цену товара после скидки.</p><button class="primary" onclick="showCalc('discount')">Открыть</button></article>
+<article class="card"><h2>⛽ Топливо</h2><p>Посчитайте стоимость поездки по расстоянию и расходу.</p><button class="primary" onclick="showCalc('fuel')">Открыть</button></article>
+</main>
+
+<section class="calc" id="calculator" hidden>
+<div class="panel">
+<h2 id="calcTitle"></h2>
+<div id="fields"></div>
+<button class="primary" id="calculateBtn" style="margin-top:18px">Рассчитать</button>
+<div id="result"></div>
+</div>
+</section>
+
+<footer>© 2026 Hisobla.uz · Бесплатные инструменты для расчётов</footer>
+
+<script>
+const configs={
+credit:{
+title:"Калькулятор кредита",
+fields:[
+["amount","Сумма кредита (сум)","number","10000000"],
+["rate","Годовая ставка (%)","number","24"],
+["months","Срок (месяцев)","number","24"]],
+calc:v=>{
+ const P=v.amount,r=v.rate/100/12,n=v.months;
+ if(!P||!r||!n)return null;
+ const m=P*r*Math.pow(1+r,n)/(Math.pow(1+r,n)-1);
+ return `Ежемесячный платёж: <strong>${fmt(m)} сум</strong><div class="small">Всего выплат: ${fmt(m*n)} сум</div>`;
+}},
+percent:{
+title:"Калькулятор процентов",
+fields:[["amount","Сумма (сум)","number","5000000"],["rate","Процент (%)","number","18"]],
+calc:v=> v.amount&&v.rate ? `Результат: <strong>${fmt(v.amount*v.rate/100)} сум</strong><div class="small">${v.rate}% от ${fmt(v.amount)} сум</div>`:null
+},
+discount:{
+title:"Калькулятор скидки",
+fields:[["price","Цена товара (сум)","number","1000000"],["discount","Скидка (%)","number","20"]],
+calc:v=> v.price&&v.discount>=0 ? `Цена после скидки: <strong>${fmt(v.price*(1-v.discount/100))} сум</strong><div class="small">Экономия: ${fmt(v.price*v.discount/100)} сум</div>`:null
+},
+fuel:{
+title:"Калькулятор топлива",
+fields:[["distance","Расстояние (км)","number","100"],["consumption","Расход (л/100 км)","number","8"],["fuelPrice","Цена топлива (сум/л)","number","12000"]],
+calc:v=> v.distance&&v.consumption&&v.fuelPrice ? `Стоимость поездки: <strong>${fmt(v.distance/100*v.consumption*v.fuelPrice)} сум</strong><div class="small">Топлива потребуется: ${fmt(v.distance/100*v.consumption)} л</div>`:null
+}};
+let current;
+function fmt(n){return new Intl.NumberFormat('ru-RU',{maximumFractionDigits:0}).format(Math.round(n))}
+function showCalc(name){
+ current=configs[name]; document.getElementById('calculator').hidden=false;
+ document.getElementById('calcTitle').textContent=current.title;
+ document.getElementById('fields').innerHTML=current.fields.map(f=>`<label>${f[1]}<input id="${f[0]}" type="${f[2]}" value="${f[3]}" min="0"></label>`).join('');
+ document.getElementById('result').innerHTML='';
+ document.getElementById('calculator').scrollIntoView({behavior:'smooth'});
+}
+document.getElementById('calculateBtn').onclick=()=>{
+ const v={}; current.fields.forEach(f=>v[f[0]]=Number(document.getElementById(f[0]).value));
+ const out=current.calc(v); document.getElementById('result').innerHTML=out?`<div class="result">${out}</div>`:`<div class="error">Введите корректные значения.</div>`;
+};
+document.getElementById('langBtn').onclick=()=>alert('Узбекская версия будет добавлена следующим шагом.');
+</script>
+</body>
+</html>
